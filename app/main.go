@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
@@ -22,13 +23,51 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
+	defer l.Close()
+
+	connChan := readConnection(l)
+
+	parseCommand(connChan)
+
+}
+
+func readConnection(l net.Listener) chan net.Conn {
+	connChan := make(chan net.Conn)
+
+	go func() {
+		for {
+			conn, err := l.Accept()
+			if err != nil {
+				fmt.Println("Error accepting connection: ", err.Error())
+				os.Exit(1)
+			}
+
+			connChan <- conn
+		}
+	}()
+	return connChan
+}
+
+func parseCommand(connChan chan net.Conn) {
+	for {
+		select {
+		case conn := <-connChan:
+			func(conn net.Conn) {
+				defer conn.Close()
+
+				data := make([]byte, 0)
+				if _, err := conn.Read(data); err != nil {
+					fmt.Println("Error reading request: ", err.Error())
+					return
+				}
+
+				command := string(data)
+				resp := "+PONG\r\n"
+				for range strings.Split(command, "\n") {
+					resp += "+PONG\r\n"
+				}
+				_, _ = conn.Write([]byte(resp))
+			}(conn)
+		}
 	}
-
-	defer conn.Close()
-
-	conn.Write([]byte("+PONG\r\n"))
 }
