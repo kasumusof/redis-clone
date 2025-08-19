@@ -39,7 +39,7 @@ func main() {
 }
 
 func readConnection(l net.Listener) chan net.Conn {
-	connChan := make(chan net.Conn, 3)
+	connChan := make(chan net.Conn)
 
 	go func() {
 		for {
@@ -60,6 +60,7 @@ func parseCommand(connChan chan net.Conn) {
 		select {
 		case conn := <-connChan:
 			go func(conn net.Conn) {
+				defer closeConnection(conn)
 				for {
 					buff := bufio.NewReader(conn)
 					command, err := buff.ReadString('\n')
@@ -70,21 +71,18 @@ func parseCommand(connChan chan net.Conn) {
 						log.Fatal("buffer error", err)
 					}
 
-					fmt.Println("command", command)
-					resp := "+PONG\r\n"
-					//commands := strings.Fields(command)
-					//arg0 := strings.ToUpper(commands[0])
-					//switch arg0 {
-					//case "PING":
-					//	resp = "+PONG\r\n"
-					//default:
-					//	resp = "-ERR unknown command '" + arg0 + "'\r\n"
-					//	resp = "+" + strings.Join(commands[1:], " ") + "\r\n"
-					//}
+					_ = command
 
+					resp := "+PONG\r\n"
 					_, _ = conn.Write([]byte(resp))
 				}
 			}(conn)
 		}
+	}
+}
+
+func closeConnection(conn net.Conn) {
+	if err := conn.Close(); err != nil {
+		log.Fatal(err)
 	}
 }
