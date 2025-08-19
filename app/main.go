@@ -54,23 +54,18 @@ func parseCommand(connChan chan net.Conn) {
 			go func(conn net.Conn) {
 				defer conn.Close()
 				data := make([]byte, 0)
-				for {
-					if _, err := conn.Read(data); err != nil {
-						//if errors.Is(err, io.EOF) {
-						//	break
-						//}
-						fmt.Println("Error reading request: ", err.Error())
-						return
-					}
-
-					command := string(data)
-					_ = command
-					resp := "+PONG\r\n"
-					//for range strings.Split(command, "\n") {
-					//	resp += "+PONG\r\n"
-					//}
-					_, _ = conn.Write([]byte(resp))
+				if _, err := conn.Read(data); err != nil {
+					fmt.Println("Error reading request: ", err.Error())
+					return
 				}
+
+				command := string(data)
+				_ = command
+				resp := "+PONG\r\n"
+				//for range strings.Split(command, "\n") {
+				//	resp += "+PONG\r\n"
+				//}
+				_, _ = conn.Write([]byte(resp))
 			}(conn)
 		}
 	}
