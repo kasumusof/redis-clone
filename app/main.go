@@ -52,7 +52,6 @@ func parseCommand(connChan chan net.Conn) {
 		select {
 		case conn := <-connChan:
 			go func(conn net.Conn) {
-				defer conn.Close()
 				data := make([]byte, 0)
 				if _, err := conn.Read(data); err != nil {
 					fmt.Println("Error reading request: ", err.Error())
