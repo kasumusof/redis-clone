@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
 )
@@ -22,7 +23,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer l.Close()
+	defer func() {
+		if err := l.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	connChan := readConnection(l)
 
@@ -52,19 +57,21 @@ func parseCommand(connChan chan net.Conn) {
 		select {
 		case conn := <-connChan:
 			go func(conn net.Conn) {
-				data := make([]byte, 0)
-				if _, err := conn.Read(data); err != nil {
-					fmt.Println("Error reading request: ", err.Error())
-					return
-				}
+				for {
+					data := make([]byte, 0)
+					if _, err := conn.Read(data); err != nil {
+						fmt.Println("Error reading request: ", err.Error())
+						return
+					}
 
-				command := string(data)
-				_ = command
-				resp := "+PONG\r\n"
-				//for range strings.Split(command, "\n") {
-				//	resp += "+PONG\r\n"
-				//}
-				_, _ = conn.Write([]byte(resp))
+					command := string(data)
+					_ = command
+					resp := "+PONG\r\n"
+					//for range strings.Split(command, "\n") {
+					//	resp += "+PONG\r\n"
+					//}
+					_, _ = conn.Write([]byte(resp))
+				}
 			}(conn)
 		}
 	}
