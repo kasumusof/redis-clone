@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -58,18 +61,27 @@ func parseCommand(connChan chan net.Conn) {
 		case conn := <-connChan:
 			go func(conn net.Conn) {
 				for {
-					data := make([]byte, 0)
-					if _, err := conn.Read(data); err != nil {
-						fmt.Println("Error reading request: ", err.Error())
-						return
+					buff := bufio.NewReader(conn)
+					command, err := buff.ReadString('\n')
+					if err != nil {
+						if errors.Is(err, io.EOF) {
+							continue
+						}
+						log.Fatal("buffer error", err)
 					}
 
-					command := string(data)
-					_ = command
+					fmt.Println("command", command)
 					resp := "+PONG\r\n"
-					//for range strings.Split(command, "\n") {
-					//	resp += "+PONG\r\n"
+					//commands := strings.Fields(command)
+					//arg0 := strings.ToUpper(commands[0])
+					//switch arg0 {
+					//case "PING":
+					//	resp = "+PONG\r\n"
+					//default:
+					//	resp = "-ERR unknown command '" + arg0 + "'\r\n"
+					//	resp = "+" + strings.Join(commands[1:], " ") + "\r\n"
 					//}
+
 					_, _ = conn.Write([]byte(resp))
 				}
 			}(conn)
