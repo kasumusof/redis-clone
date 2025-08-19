@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
@@ -32,7 +31,7 @@ func main() {
 }
 
 func readConnection(l net.Listener) chan net.Conn {
-	connChan := make(chan net.Conn)
+	connChan := make(chan net.Conn, 3)
 
 	go func() {
 		for {
@@ -52,21 +51,26 @@ func parseCommand(connChan chan net.Conn) {
 	for {
 		select {
 		case conn := <-connChan:
-			func(conn net.Conn) {
+			go func(conn net.Conn) {
 				defer conn.Close()
-
 				data := make([]byte, 0)
-				if _, err := conn.Read(data); err != nil {
-					fmt.Println("Error reading request: ", err.Error())
-					return
-				}
+				for {
+					if _, err := conn.Read(data); err != nil {
+						//if errors.Is(err, io.EOF) {
+						//	break
+						//}
+						fmt.Println("Error reading request: ", err.Error())
+						return
+					}
 
-				command := string(data)
-				resp := "+PONG\r\n"
-				for range strings.Split(command, "\n") {
-					resp += "+PONG\r\n"
+					command := string(data)
+					_ = command
+					resp := "+PONG\r\n"
+					//for range strings.Split(command, "\n") {
+					//	resp += "+PONG\r\n"
+					//}
+					_, _ = conn.Write([]byte(resp))
 				}
-				_, _ = conn.Write([]byte(resp))
 			}(conn)
 		}
 	}
