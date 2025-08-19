@@ -8,11 +8,16 @@ import (
 	"log"
 	"net"
 	"os"
+
+	"github.com/codecrafters-io/redis-starter-go/app/executor"
+	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
-var _ = net.Listen
-var _ = os.Exit
+var (
+	_ = net.Listen
+	_ = os.Exit
+)
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -59,22 +64,27 @@ func parseCommand(connChan chan net.Conn) {
 	for {
 		select {
 		case conn := <-connChan:
+			buff := bufio.NewReader(conn)
 			go func(conn net.Conn) {
 				defer closeConnection(conn)
 				for {
-					buff := bufio.NewReader(conn)
-					command, err := buff.ReadString('\n')
+					res, err := protocol.ParseRequest(buff)
 					if err != nil {
 						if errors.Is(err, io.EOF) {
 							continue
 						}
-						log.Fatal("buffer error", err)
+
+						log.Println(err)
 					}
 
-					_ = command
+					resp, err := executor.Execute(res)
+					if err != nil {
+						log.Println(err)
+					}
 
-					resp := "+PONG\r\n"
-					_, _ = conn.Write([]byte(resp))
+					if _, err = conn.Write([]byte(resp)); err != nil {
+						log.Println(err)
+					}
 				}
 			}(conn)
 		}
