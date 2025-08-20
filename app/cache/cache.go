@@ -280,18 +280,16 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 }
 
 func validateXAddID(id string, data []map[any]any) (string, bool) {
-	if id == "*" {
-		id = fmt.Sprintf("%d-*", time.Now().UnixMilli())
-	}
 
-	if len(data) == 0 {
-		if strings.HasSuffix(id, "-*") {
-			id = "0-1"
-		}
+	if len(data) == 0 && strings.HasSuffix(id, "-*") && id != "*" {
+		id = "0-1"
 
 		return id, true
 	}
 
+	if id == "*" {
+		id = fmt.Sprintf("%d-*", time.Now().UnixMilli())
+	}
 	last := data[len(data)-1][streamIDKey].(string)
 
 	idSplit := strings.Split(id, "-")
