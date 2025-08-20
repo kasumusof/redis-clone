@@ -260,9 +260,10 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	if !ok {
 		m = make([]map[any]any, 0)
 	} else {
+		var valid bool
 		last := m[len(m)-1]
 		lastID := last[streamIDKey].(string)
-		_, valid := validateXAddID(id, lastID)
+		id, valid = validateXAddID(id, lastID)
 		if !valid {
 			return lastID, false
 		}
