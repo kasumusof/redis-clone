@@ -1,6 +1,8 @@
 package executor
 
 import (
+	"strings"
+
 	"github.com/codecrafters-io/redis-starter-go/app/cache"
 	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
@@ -21,9 +23,9 @@ func handleXAdd(args []string) (string, error) {
 		return protocol.ErrorString("ERR wrong number of arguments for 'xadd' command"), nil
 	}
 
-	otherArgs := make([][2]any, len(args[2:])/2)
+	otherArgs := make([]any, len(args[2:]))
 	for i := 0; i < len(otherArgs); i++ {
-		otherArgs[i] = [2]any{args[2+i*2], args[2+i*2+1]}
+		otherArgs[i] = args[i+2]
 	}
 
 	r, ok := cache.XAdd(key, id, otherArgs)
@@ -32,4 +34,20 @@ func handleXAdd(args []string) (string, error) {
 	}
 
 	return protocol.BulkString(r), nil
+}
+
+func handleXRange(args []string) (string, error) {
+	if len(args) < 3 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'xrange' command"), nil
+	}
+
+	start := strings.TrimSpace(args[1])
+	end := strings.TrimSpace(args[2])
+
+	r := cache.XRange(args[0], start, end)
+	if len(r) == 0 {
+		return protocol.Array([]any{}), nil
+	}
+
+	return protocol.Array(r), nil
 }

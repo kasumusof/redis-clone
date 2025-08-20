@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-const (
-	streamIDKey = "id"
-)
-
 var (
 	_ Cache = (*cache)(nil)
 )
@@ -28,14 +24,15 @@ type Cache interface {
 	LPop(key string, count *int) any
 	Type(key string) string
 	BLPop(key string, timeout float64) chan any
-	XAdd(key string, id string, elems [][2]any) (string, bool)
+	XAdd(key string, id string, elems []any) (string, bool)
+	XRange(key string, start string, end string) []any
 }
 type cache struct {
 	data               map[any]any
 	listData           map[any][]any
 	blockedClients     []chan any
 	listDataInsertChan chan struct{}
-	streamData         map[any][]map[any]any
+	streamData         map[any][][2]any
 }
 
 func New() Cache {
@@ -44,7 +41,7 @@ func New() Cache {
 		listData:           make(map[any][]any),
 		blockedClients:     []chan any{},
 		listDataInsertChan: make(chan struct{}, 3),
-		streamData:         make(map[any][]map[any]any),
+		streamData:         make(map[any][][2]any),
 	}
 
 	go c.runJob()
@@ -255,10 +252,10 @@ func (c *cache) BLPop(key string, timeout float64) chan any {
 	return commChan
 }
 
-func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
+func (c *cache) XAdd(key string, id string, elems []any) (string, bool) {
 	m, ok := c.streamData[key]
 	if !ok {
-		m = make([]map[any]any, 0)
+		m = make([][2]any, 0)
 	}
 
 	var valid bool
@@ -267,19 +264,14 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 		return id, false
 	}
 
-	d := make(map[any]any)
-	d[streamIDKey] = id
-	for _, elem := range elems {
-		d[elem[0]] = elem[1]
-	}
-
+	d := [2]any{id, elems}
 	m = append(m, d)
 
 	c.streamData[key] = m
 	return id, true
 }
 
-func validateXAddID(id string, data []map[any]any) (string, bool) {
+func validateXAddID(id string, data [][2]any) (string, bool) {
 
 	if id == "*" {
 		id = fmt.Sprintf("%d-*", time.Now().UnixMilli())
@@ -297,7 +289,7 @@ func validateXAddID(id string, data []map[any]any) (string, bool) {
 		return id, true
 	}
 
-	last := data[len(data)-1][streamIDKey].(string)
+	last := data[len(data)-1]
 
 	idSplit := strings.Split(id, "-")
 	if len(idSplit) != 2 {
@@ -305,7 +297,7 @@ func validateXAddID(id string, data []map[any]any) (string, bool) {
 	}
 
 	newTime, newIncr := idSplit[0], idSplit[1]
-	lastSplit := strings.Split(last, "-")
+	lastSplit := strings.Split(last[0].(string), "-")
 	if len(lastSplit) != 2 {
 		return id, false
 	}
@@ -329,4 +321,19 @@ func validateXAddID(id string, data []map[any]any) (string, bool) {
 	default:
 		return id, true
 	}
+}
+
+func (c *cache) XRange(key string, start string, end string) []any {
+	x, ok := c.streamData[key]
+	if !ok {
+		return nil
+	}
+	var res []any
+	for _, v := range x {
+		id := strings.Split(v[0].(string), "-")[0]
+		if id >= start && id <= end {
+			res = append(res, v)
+		}
+	}
+	return res
 }
