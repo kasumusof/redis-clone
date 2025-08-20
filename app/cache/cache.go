@@ -385,6 +385,19 @@ func idIsLessOrEqual(main string, target string) bool {
 	return false
 }
 
+func idIsGreater(main string, target string) bool {
+	timeMain, incrMain := strings.Split(main, "-")[0], strings.Split(main, "-")[1]
+	timeTarget, incrTarget := strings.Split(target, "-")[0], strings.Split(target, "-")[1]
+	if timeMain > timeTarget {
+		return true
+	} else if timeMain == timeTarget {
+		incrMain, _ := strconv.Atoi(incrMain)
+		incrTarget, _ := strconv.Atoi(incrTarget)
+		return incrMain > incrTarget
+	}
+	return false
+}
+
 func (c *cache) XRead(key string, idTarget string) []any {
 	var res []any
 	v, ok := c.streamData[key]
@@ -394,11 +407,11 @@ func (c *cache) XRead(key string, idTarget string) []any {
 
 	for _, v := range v {
 		id := v[0].(string)
-		if id == idTarget {
-			res = []any{key, v}
-			return res
+		if idIsGreater(id, idTarget) {
+			res = append(res, v)
+			continue
 		}
 	}
 
-	return res
+	return append([]any{key}, res)
 }
