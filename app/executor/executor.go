@@ -57,6 +57,8 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleBLPop(args)
 	case "type":
 		return handleType(args)
+	case "xadd":
+		return handleXAdd(args)
 	default:
 		return errorString, nil
 

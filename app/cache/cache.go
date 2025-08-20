@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	streamIDKey = "id"
+)
+
 var (
 	_ Cache = (*cache)(nil)
 )
@@ -22,12 +26,14 @@ type Cache interface {
 	LPop(key string, count *int) any
 	Type(key string) string
 	BLPop(key string, timeout float64) chan any
+	XAdd(key string, id string, elems [][2]any) string
 }
 type cache struct {
 	data               map[any]any
 	listData           map[any][]any
 	blockedClients     []chan any
 	listDataInsertChan chan struct{}
+	streamData         map[any][]map[any]any
 }
 
 func New() Cache {
@@ -217,7 +223,9 @@ func (c *cache) BLPop(key string, timeout float64) chan any {
 
 		ctx := context.Background()
 		if timeout > 0 {
-			ctx, _ = context.WithTimeout(ctx, time.Duration(timeout*float64(time.Second)))
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, time.Duration(timeout*float64(time.Second)))
+			defer cancel()
 		}
 
 		for {
@@ -237,4 +245,22 @@ func (c *cache) BLPop(key string, timeout float64) chan any {
 		}
 	}()
 	return commChan
+}
+
+func (c *cache) XAdd(key string, id string, elems [][2]any) string {
+	m, ok := c.streamData[key]
+	if !ok {
+		m = make([]map[any]any, 0)
+	}
+
+	d := make(map[any]any)
+	d[streamIDKey] = id
+	for _, elem := range elems {
+		d[elem[0]] = elem[1]
+	}
+
+	m = append(m, d)
+
+	c.streamData[key] = m
+	return id
 }
