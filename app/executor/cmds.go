@@ -1,6 +1,10 @@
 package executor
 
-import "github.com/codecrafters-io/redis-starter-go/app/protocol"
+import (
+	"strings"
+
+	"github.com/codecrafters-io/redis-starter-go/app/protocol"
+)
 
 func handleEcho(args []string) (string, error) {
 	if len(args) == 0 {
@@ -17,4 +21,11 @@ func handleEcho(args []string) (string, error) {
 	}
 
 	return protocol.Array(argsToUse), nil
+}
+
+func handlePing(args []string) (string, error) {
+	if len(args) > 0 {
+		return protocol.ErrorString(strings.Join(args, " ")), nil
+	}
+	return protocol.SimpleString("PONG"), nil
 }

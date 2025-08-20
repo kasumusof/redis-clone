@@ -8,6 +8,17 @@ import (
 	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
 
+func handleGet(args []string) (string, error) {
+	if len(args) < 1 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'get' command"), nil
+	}
+	val, ok := cache.Get(args[0])
+	if !ok {
+		return protocol.BulkString(""), nil
+	}
+	return protocol.BulkString(val.(string)), nil
+}
+
 func handleSet(args []string) (string, error) {
 	if len(args) < 2 {
 		return protocol.ErrorString("ERR wrong number of arguments for 'set' command"), nil
