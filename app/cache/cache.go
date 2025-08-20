@@ -209,7 +209,7 @@ func (c *cache) Type(key string) string {
 		return "array"
 	case map[any]any:
 		return "map"
-	case []map[any]any:
+	case map[any][][2]any:
 		return "stream"
 	default:
 		return "none"
