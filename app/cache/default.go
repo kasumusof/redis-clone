@@ -59,6 +59,6 @@ func BLPop(s string, timeout float64) chan any {
 	return defaultCache.BLPop(s, timeout)
 }
 
-func XAdd(key string, id string, elems [][2]any) string {
+func XAdd(key string, id string, elems [][2]any) (string, bool) {
 	return defaultCache.XAdd(key, id, elems)
 }

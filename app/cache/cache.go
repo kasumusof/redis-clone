@@ -3,6 +3,8 @@ package cache
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -26,7 +28,7 @@ type Cache interface {
 	LPop(key string, count *int) any
 	Type(key string) string
 	BLPop(key string, timeout float64) chan any
-	XAdd(key string, id string, elems [][2]any) string
+	XAdd(key string, id string, elems [][2]any) (string, bool)
 }
 type cache struct {
 	data               map[any]any
@@ -253,10 +255,16 @@ func (c *cache) BLPop(key string, timeout float64) chan any {
 	return commChan
 }
 
-func (c *cache) XAdd(key string, id string, elems [][2]any) string {
+func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	m, ok := c.streamData[key]
 	if !ok {
 		m = make([]map[any]any, 0)
+	} else {
+		last := m[len(m)-1]
+		lastID := last[streamIDKey].(string)
+		if !validateXAddID(id, lastID) {
+			return lastID, false
+		}
 	}
 
 	d := make(map[any]any)
@@ -268,5 +276,31 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) string {
 	m = append(m, d)
 
 	c.streamData[key] = m
-	return id
+	return id, true
+}
+
+func validateXAddID(id string, lastElemID string) bool {
+	idSplit := strings.Split(id, "-")
+	if len(idSplit) != 2 {
+		return false
+	}
+
+	newTime, _ := strconv.Atoi(idSplit[0])
+	newIncr, _ := strconv.Atoi(idSplit[1])
+	lastSplit := strings.Split(lastElemID, "-")
+	if len(lastSplit) != 2 {
+		return false
+	}
+
+	lastTime, _ := strconv.Atoi(lastSplit[0])
+	lastIncr, _ := strconv.Atoi(lastSplit[1])
+
+	switch {
+	case newTime < lastTime:
+		return false
+	case newTime == lastTime && newIncr <= lastIncr:
+		return false
+	default:
+		return true
+	}
 }

@@ -22,6 +22,10 @@ func handleXAdd(args []string) (string, error) {
 		otherArgs[i] = [2]any{args[2+i*2], args[2+i*2+1]}
 	}
 
-	r := cache.XAdd(key, id, otherArgs)
+	r, ok := cache.XAdd(key, id, otherArgs)
+	if !ok {
+		return protocol.ErrorString("ERR The ID specified in XADD is equal or smaller than the target stream top item"), nil
+	}
+
 	return protocol.BulkString(r), nil
 }
