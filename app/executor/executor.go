@@ -3,6 +3,7 @@ package executor
 import (
 	"strings"
 
+	"github.com/codecrafters-io/redis-starter-go/app/cache"
 	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
 
@@ -53,6 +54,21 @@ func Execute(resp protocol.RESP) (string, error) {
 			return protocol.ErrorString(strings.Join(args, " ")), nil
 		}
 		return protocol.SimpleString("PONG"), nil
+	case "set":
+		if len(args) < 2 {
+			return protocol.ErrorString("ERR wrong number of arguments for 'set' command"), nil
+		}
+		cache.Set(args[0], args[1])
+		return protocol.SimpleString("OK"), nil
+	case "get":
+		if len(args) < 1 {
+			return protocol.ErrorString("ERR wrong number of arguments for 'get' command"), nil
+		}
+		val, ok := cache.Get(args[0])
+		if !ok {
+			return protocol.Nulls(), nil
+		}
+		return protocol.BulkString(val.(string)), nil
 	default:
 		return errorString, nil
 
