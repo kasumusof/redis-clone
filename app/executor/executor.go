@@ -41,6 +41,8 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleSet(args)
 	case "get":
 		return handleGet(args)
+	case "rpush":
+		return handleRPush(args)
 	default:
 		return errorString, nil
 

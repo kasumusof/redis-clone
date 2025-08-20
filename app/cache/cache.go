@@ -1,23 +1,24 @@
 package cache
 
-import "time"
-
 var (
-	_            Cache = (*cache)(nil)
-	defaultCache Cache
+	_ Cache = (*cache)(nil)
 )
-
-func init() {
-	defaultCache = New()
-}
 
 type Cache interface {
 	Set(key string, value any)
 	Get(key string) (any, bool)
 	Del(key string) any
+	RPush(key string, data any) int
 }
 type cache struct {
-	data map[any]any
+	data     map[any]any
+	listData map[any][]any
+}
+
+func (c *cache) RPush(key string, data any) int {
+	v, _ := c.listData[key]
+	c.listData[key] = append(v, data)
+	return len(v) + 1
 }
 
 func (c *cache) Set(key string, value any) {
@@ -48,22 +49,4 @@ func (c *cache) runJob() {
 	for {
 		select {}
 	}
-}
-
-func Set(key string, value any, expiration int) {
-	defaultCache.Set(key, value)
-	if expiration > 0 {
-		go func() {
-			<-time.After(time.Duration(expiration) * time.Millisecond)
-			Del(key)
-		}()
-	}
-}
-
-func Get(key string) (any, bool) {
-	return defaultCache.Get(key)
-}
-
-func Del(key string) any {
-	return defaultCache.Del(key)
 }
