@@ -30,3 +30,7 @@ func Del(key string) any {
 func RPush(key string, value []any) int {
 	return defaultCache.RPush(key, value)
 }
+
+func LRange(key string, start, end int) []any {
+	return defaultCache.LRange(key, start, end)
+}

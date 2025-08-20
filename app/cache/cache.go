@@ -9,6 +9,7 @@ type Cache interface {
 	Get(key string) (any, bool)
 	Del(key string) any
 	RPush(key string, data []any) int
+	LRange(key string, start, end int) []any
 }
 type cache struct {
 	data     map[any]any
@@ -25,12 +26,6 @@ func New() Cache {
 	return c
 }
 
-func (c *cache) RPush(key string, data []any) int {
-	v, _ := c.listData[key]
-	c.listData[key] = append(v, data...)
-	return len(v) + len(data)
-}
-
 func (c *cache) Set(key string, value any) {
 	c.data[key] = value
 }
@@ -44,6 +39,26 @@ func (c *cache) Del(key string) any {
 	old := c.data[key]
 	delete(c.data, key)
 	return old
+}
+
+func (c *cache) RPush(key string, data []any) int {
+	v, _ := c.listData[key]
+	c.listData[key] = append(v, data...)
+	return len(v) + len(data)
+}
+
+func (c *cache) LRange(key string, start, end int) []any {
+	v, _ := c.listData[key]
+	if len(v) == 0 {
+		return nil
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > len(v) {
+		end = len(v)
+	}
+	return v[start:end]
 }
 
 func (c *cache) runJob() {

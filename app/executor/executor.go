@@ -43,6 +43,8 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleGet(args)
 	case "rpush":
 		return handleRPush(args)
+	case "lrange":
+		return handleLRange(args)
 	default:
 		return errorString, nil
 
