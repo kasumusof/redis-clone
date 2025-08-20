@@ -27,9 +27,10 @@ func handleLPush(args []string) (string, error) {
 		return protocol.ErrorString("ERR wrong number of arguments for 'lpush' command"), nil
 	}
 
-	anyArgs := make([]any, len(args[1:]))
-	for i, a := range args[1:] {
-		anyArgs[i] = a
+	otherArgs := args[1:]
+	anyArgs := make([]any, len(otherArgs))
+	for i, a := range otherArgs {
+		anyArgs[len(otherArgs)-i-1] = a
 	}
 
 	r := cache.LPush(args[0], anyArgs)
