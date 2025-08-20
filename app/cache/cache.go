@@ -413,5 +413,6 @@ func (c *cache) XRead(key string, idTarget string) []any {
 		}
 	}
 
-	return append([]any{key}, res)
+	res = append([]any{key}, res)
+	return []any{res}
 }
