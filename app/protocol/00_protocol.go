@@ -167,9 +167,6 @@ func BulkString(s string) string {
 
 func Array(a []any) string {
 	i := len(a)
-	if i == 0 { // null array
-		i = -1
-	}
 
 	resp := fmt.Sprintf("%c%d\r\n", array, i)
 	for _, v := range a { // TODO: add more types

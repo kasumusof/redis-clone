@@ -37,5 +37,9 @@ func handleLRange(args []string) (string, error) {
 	}
 
 	r := cache.LRange(args[0], start, end)
+	if len(r) == 0 {
+		return protocol.Array([]any{}), nil
+	}
+
 	return protocol.Array(r), nil
 }
