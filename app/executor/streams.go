@@ -47,3 +47,16 @@ func handleXRange(args []string) (string, error) {
 	r := cache.XRange(args[0], start, end)
 	return protocol.Array(r), nil
 }
+
+func handleXRead(args []string) (string, error) {
+	if len(args) < 3 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'xread' command"), nil
+	}
+
+	if strings.ToLower(args[0]) != "streams" {
+		return protocol.ErrorString("ERR wrong argument for 'xread' command"), nil
+	}
+
+	r := cache.XRead(args[1], args[2])
+	return protocol.Array(r), nil
+}

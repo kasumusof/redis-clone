@@ -61,6 +61,8 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleXAdd(args)
 	case "xrange":
 		return handleXRange(args)
+	case "xread":
+		return handleXRead(args)
 	default:
 		return errorString, nil
 

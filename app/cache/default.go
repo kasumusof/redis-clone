@@ -66,3 +66,7 @@ func XAdd(key string, id string, elems []any) (string, bool) {
 func XRange(key, start, end string) []any {
 	return defaultCache.XRange(key, start, end)
 }
+
+func XRead(key string, id string) []any {
+	return defaultCache.XRead(key, id)
+}

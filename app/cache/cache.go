@@ -27,6 +27,7 @@ type Cache interface {
 	BLPop(key string, timeout float64) chan any
 	XAdd(key string, id string, elems []any) (string, bool)
 	XRange(key string, start string, end string) []any
+	XRead(key string, id string) []any
 }
 type cache struct {
 	data               map[any]any
@@ -382,4 +383,22 @@ func idIsLessOrEqual(main string, target string) bool {
 		return incrMain <= incrTarget
 	}
 	return false
+}
+
+func (c *cache) XRead(key string, idTarget string) []any {
+	var res []any
+	v, ok := c.streamData[key]
+	if !ok {
+		return res
+	}
+
+	for _, v := range v {
+		id := v[0].(string)
+		if id == idTarget {
+			res = []any{key, v}
+			return res
+		}
+	}
+
+	return res
 }
