@@ -259,18 +259,14 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	m, ok := c.streamData[key]
 	if !ok {
 		m = make([]map[any]any, 0)
-	} else {
-		var valid bool
-		last := m[len(m)-1]
-		lastID := last[streamIDKey].(string)
-		id, valid = validateXAddID(id, lastID)
-		if !valid {
-			return lastID, false
-		}
 	}
 
-	if strings.HasSuffix(id, "*") {
-		id = "0-1"
+	var valid bool
+	last := m[len(m)-1]
+	lastID := last[streamIDKey].(string)
+	id, valid = validateXAddID(id, m)
+	if !valid {
+		return lastID, false
 	}
 
 	d := make(map[any]any)
@@ -285,14 +281,28 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	return id, true
 }
 
-func validateXAddID(id string, lastElemID string) (string, bool) {
+func validateXAddID(id string, data []map[any]any) (string, bool) {
+	if id == "*" {
+		id = fmt.Sprintf("%d-*", time.Now().UnixMilli())
+	}
+
+	if len(data) == 0 {
+		if strings.HasSuffix(id, "-*") {
+			id = "0-1"
+		}
+
+		return id, true
+	}
+
+	last := data[len(data)-1][streamIDKey].(string)
+
 	idSplit := strings.Split(id, "-")
 	if len(idSplit) != 2 {
 		return id, false
 	}
 
 	newTime, newIncr := idSplit[0], idSplit[1]
-	lastSplit := strings.Split(lastElemID, "-")
+	lastSplit := strings.Split(last, "-")
 	if len(lastSplit) != 2 {
 		return id, false
 	}
