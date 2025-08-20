@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -401,21 +403,26 @@ func idIsGreater(main string, target string) bool {
 func (c *cache) XRead(keys []string, targetIDs []string) []any {
 	var gres []any
 
+	var eg errgroup.Group
 	for i, key := range keys {
-		var res []any
-		targetID := targetIDs[i]
-		v, _ := c.streamData[key]
-		for _, v := range v {
-			id := v[0].(string)
-			if idIsGreater(id, targetID) {
-				res = append(res, v)
-				continue
+		eg.Go(func() error {
+			var res []any
+			targetID := targetIDs[i]
+			v, _ := c.streamData[key]
+			for _, v := range v {
+				id := v[0].(string)
+				if idIsGreater(id, targetID) {
+					res = append(res, v)
+					continue
+				}
 			}
-		}
 
-		res = append([]any{key}, res)
-		gres = append(gres, res)
+			res = append([]any{key}, res)
+			gres = append(gres, res)
+			return nil
+		})
 	}
 
+	_ = eg.Wait()
 	return gres
 }
