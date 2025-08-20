@@ -269,6 +269,10 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 		}
 	}
 
+	if strings.HasSuffix(id, "*") {
+		id = "0-0"
+	}
+
 	d := make(map[any]any)
 	d[streamIDKey] = id
 	for _, elem := range elems {
