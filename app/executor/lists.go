@@ -126,7 +126,7 @@ func handleBLPop(args []string) (string, error) {
 		return protocol.ErrorString("ERR wrong number of arguments for 'blpop' command"), nil
 	}
 
-	timeout, err := strconv.Atoi(args[1])
+	timeout, err := strconv.ParseFloat(args[1], 32)
 	if err != nil {
 		return protocol.ErrorString("ERR invalid timeout argument for 'blpop' command"), nil
 	}

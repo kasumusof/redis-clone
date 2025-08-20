@@ -55,6 +55,6 @@ func Type(key string) string {
 	return defaultCache.Type(key)
 }
 
-func BLPop(s string, timeout int) chan any {
+func BLPop(s string, timeout float64) chan any {
 	return defaultCache.BLPop(s, timeout)
 }

@@ -21,7 +21,7 @@ type Cache interface {
 	RPop(key string, count *int) any
 	LPop(key string, count *int) any
 	Type(key string) string
-	BLPop(key string, timeout int) chan any
+	BLPop(key string, timeout float64) chan any
 }
 type cache struct {
 	data               map[any]any
@@ -204,7 +204,7 @@ func (c *cache) Type(key string) string {
 		return "none"
 	}
 }
-func (c *cache) BLPop(key string, timeout int) chan any {
+func (c *cache) BLPop(key string, timeout float64) chan any {
 	commChan := make(chan any)
 	c.blockedClients = append(c.blockedClients, commChan)
 	go func() {
