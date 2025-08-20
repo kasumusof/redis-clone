@@ -13,11 +13,9 @@ func handleSet(args []string) (string, error) {
 		return protocol.ErrorString("ERR wrong number of arguments for 'set' command"), nil
 	}
 	exArgKey := "px"
-	exExists := false
 	var expArg string
 	for i := 2; i < len(args); i++ {
 		if strings.ToLower(args[i]) == exArgKey {
-			exExists = true
 			if i+1 < len(args) {
 				expArg = args[i+1]
 			}
@@ -25,13 +23,16 @@ func handleSet(args []string) (string, error) {
 		}
 	}
 
-	if expArg == "" && exExists {
-		return protocol.ErrorString("ERR wrong number of arguments for 'set' command"), nil
-	}
+	var (
+		err error
+		ex  int
+	)
 
-	ex, err := strconv.Atoi(strings.TrimSpace(expArg))
-	if err != nil {
-		return protocol.ErrorString("ERR wrong number of arguments for 'set' command"), nil
+	if expArg != "" {
+		ex, err = strconv.Atoi(strings.TrimSpace(expArg))
+		if err != nil {
+			return protocol.ErrorString("ERR wrong number of arguments for 'set' command"), nil
+		}
 	}
 
 	cache.Set(args[0], args[1], ex)
