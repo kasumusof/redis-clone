@@ -1,7 +1,5 @@
 package cache
 
-import "fmt"
-
 var (
 	_ Cache = (*cache)(nil)
 )
@@ -14,8 +12,8 @@ type Cache interface {
 	LPush(key string, data []any) int
 	LRange(key string, start, end int) []any
 	LLen(s string) int
-	RPop(key string) string
-	LPop(key string) string
+	RPop(key string, count int) []any
+	LPop(key string, count int) []any
 }
 type cache struct {
 	data     map[any]any
@@ -105,22 +103,51 @@ func (c *cache) LLen(s string) int {
 	return len(v)
 }
 
-func (c *cache) RPop(key string) string {
+func (c *cache) RPop(key string, count int) []any {
 	v, _ := c.listData[key]
 	if len(v) == 0 {
-		return ""
+		return nil
 	}
-	r := v[len(v)-1]
-	c.listData[key] = v[:len(v)-1]
-	return fmt.Sprintf("%v", r)
+
+	if count == 0 { // default
+		count = 1
+	}
+
+	if count > len(v) {
+		return v
+	}
+
+	endIdx := len(v) - 1 - count
+	r := v[endIdx:]
+	if count == len(v) {
+		c.listData[key] = nil
+		return r
+	}
+
+	c.listData[key] = v[:endIdx]
+	return r
 }
 
-func (c *cache) LPop(key string) string {
+func (c *cache) LPop(key string, count int) []any {
 	v, _ := c.listData[key]
 	if len(v) == 0 {
-		return ""
+		return nil
 	}
-	r := v[0]
-	c.listData[key] = v[1:]
-	return fmt.Sprintf("%v", r)
+
+	if count == 0 { // default
+		count = 1
+	}
+
+	if count > len(v) {
+		return v
+	}
+
+	r := v[0:count]
+	if count == len(v) {
+		c.listData[key] = nil
+		return r
+	}
+
+	c.listData[key] = v[count:]
+	return r
 }

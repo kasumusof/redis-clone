@@ -43,10 +43,10 @@ func LLen(key string) int {
 	return defaultCache.LLen(key)
 }
 
-func RPop(key string) string {
-	return defaultCache.RPop(key)
+func RPop(key string, count int) []any {
+	return defaultCache.RPop(key, count)
 }
 
-func LPop(key string) string {
-	return defaultCache.LPop(key)
+func LPop(key string, count int) []any {
+	return defaultCache.LPop(key, count)
 }

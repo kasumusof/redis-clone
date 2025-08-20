@@ -71,14 +71,38 @@ func handleRPop(args []string) (string, error) {
 	if len(args) < 1 {
 		return protocol.ErrorString("ERR wrong number of arguments for 'rpop' command"), nil
 	}
-	r := cache.RPop(args[0])
-	return protocol.BulkString(r), nil
+
+	idx, err := extractPopArgs(args)
+	if err != nil {
+		return protocol.ErrorString("ERR invalid index argument for 'rpop' command"), nil
+	}
+
+	r := cache.RPop(args[0], idx)
+	return protocol.Array(r), nil
 }
 
 func handleLPop(args []string) (string, error) {
 	if len(args) < 1 {
 		return protocol.ErrorString("ERR wrong number of arguments for 'lpop' command"), nil
 	}
-	r := cache.LPop(args[0])
-	return protocol.BulkString(r), nil
+
+	idx, err := extractPopArgs(args)
+	if err != nil {
+		return protocol.ErrorString("ERR invalid index argument for 'lpop' command"), nil
+	}
+
+	r := cache.LPop(args[0], idx)
+	return protocol.Array(r), nil
+}
+
+func extractPopArgs(args []string) (int, error) {
+	var (
+		idx int
+		err error
+	)
+	if len(args) > 1 {
+		otherArgs := args[1]
+		idx, err = strconv.Atoi(strings.TrimSpace(otherArgs))
+	}
+	return idx, err
 }
