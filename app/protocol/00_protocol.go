@@ -158,6 +158,7 @@ func BulkString(s string) string {
 	l := len(s)
 	if l == 0 {
 		l = -1
+		return fmt.Sprintf("%c%d\r\n", bulkString, l)
 	}
 
 	resp := fmt.Sprintf("%c%d\r\n%s\r\n", bulkString, l, s)
