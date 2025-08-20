@@ -155,7 +155,12 @@ func Integer(i int) string {
 }
 
 func BulkString(s string) string {
-	resp := fmt.Sprintf("%c%d\r\n%s\r\n", bulkString, len(s), s)
+	l := len(s)
+	if l == 0 {
+		l = -1
+	}
+
+	resp := fmt.Sprintf("%c%d\r\n%s\r\n", bulkString, l, s)
 	return resp
 }
 
