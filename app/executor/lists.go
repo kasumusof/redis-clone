@@ -78,7 +78,13 @@ func handleRPop(args []string) (string, error) {
 	}
 
 	r := cache.RPop(args[0], idx)
-	return protocol.Array(r), nil
+	switch r.(type) {
+	case string:
+		return protocol.BulkString(r.(string)), nil
+	default:
+		d, _ := r.([]any)
+		return protocol.Array(d), nil
+	}
 }
 
 func handleLPop(args []string) (string, error) {
@@ -92,17 +98,25 @@ func handleLPop(args []string) (string, error) {
 	}
 
 	r := cache.LPop(args[0], idx)
-	return protocol.Array(r), nil
+	switch r.(type) {
+	case string:
+		return protocol.BulkString(r.(string)), nil
+	default:
+		d, _ := r.([]any)
+		return protocol.Array(d), nil
+	}
 }
 
-func extractPopArgs(args []string) (int, error) {
+func extractPopArgs(args []string) (*int, error) {
 	var (
-		idx int
+		idx *int
+		a   int
 		err error
 	)
 	if len(args) > 1 {
 		otherArgs := args[1]
-		idx, err = strconv.Atoi(strings.TrimSpace(otherArgs))
+		a, err = strconv.Atoi(strings.TrimSpace(otherArgs))
+		idx = &a
 	}
 	return idx, err
 }
