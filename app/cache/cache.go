@@ -57,11 +57,11 @@ func (c *cache) LRange(key string, start, end int) []any {
 		end = len(v) + end
 	}
 
+	end += 1
 	if len(v) == 0 || start > end {
 		return []any{}
 	}
 
-	end += 1
 	if end > len(v) {
 		end = len(v)
 	}

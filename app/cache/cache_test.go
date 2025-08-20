@@ -146,3 +146,10 @@ func TestLRangeNegativeIndex(t *testing.T) {
 	got := c.LRange("list", -5, -1)
 	assert.Equal(t, []any{"mango", "apple", "orange", "pineapple", "pear"}, got)
 }
+
+func TestLRangeNegativeIndex2(t *testing.T) {
+	c := New()
+	c.RPush("list", []any{"strawberry", "blueberry", "mango", "apple", "orange", "pineapple", "pear"})
+	got := c.LRange("list", -8, -1)
+	assert.Equal(t, []any{"pear"}, got)
+}
