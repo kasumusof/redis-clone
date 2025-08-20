@@ -217,9 +217,7 @@ func (c *cache) BLPop(key string, timeout float64) chan any {
 
 		ctx := context.Background()
 		if timeout > 0 {
-			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, time.Duration(timeout)*time.Second+2*time.Millisecond)
-			defer cancel()
+			ctx, _ = context.WithTimeout(ctx, time.Duration(timeout)*time.Second+2*time.Millisecond)
 		}
 
 		for {
