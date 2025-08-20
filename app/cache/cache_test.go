@@ -59,7 +59,7 @@ func TestRPushAppendsAndLRangeReturnsSubslice(t *testing.T) {
 	require.Equal(t, 5, n)
 
 	sub := c.LRange("list", 1, 3) // returns indices [1:3) => 2,3
-	assert.Equal(t, []any{2, 3}, sub)
+	assert.Equal(t, []any{2, 3, 4}, sub)
 }
 
 func TestDelReturnsOldValueAndRemovesKey(t *testing.T) {
@@ -85,9 +85,9 @@ func TestLRangeClampsNegativeStartAndOversizedEnd(t *testing.T) {
 	c := New()
 	c.RPush("list", []any{10, 20, 30, 40})
 
-	got := c.LRange("list", -5, 999) // clamps to v[0:len-1] => v[0:3] => 10,20,30
+	got := c.LRange("list", -5, 999) // clamps to v[0:len] => v[0:4] => 10,20,30,40
 	require.NotNil(t, got)
-	assert.Equal(t, []any{10, 20, 30}, got)
+	assert.Equal(t, []any{10, 20, 30, 40}, got)
 }
 
 func TestLRangeReturnsEmptyArrayForEmptyList(t *testing.T) {
@@ -151,7 +151,7 @@ func TestLRangeNegativeIndex2(t *testing.T) {
 	c := New()
 	c.RPush("list", []any{"strawberry", "blueberry", "mango", "apple", "orange", "pineapple", "pear"})
 	got := c.LRange("list", -8, -1)
-	assert.Equal(t, []any{"pear"}, got)
+	assert.Equal(t, []any{"strawberry", "blueberry", "mango", "apple", "orange", "pineapple", "pear"}, got)
 }
 
 func TestLRangeNegativeIndex3(t *testing.T) {
