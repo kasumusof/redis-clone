@@ -13,6 +13,10 @@ func handleXAdd(args []string) (string, error) {
 	key := args[0]
 	id := args[1]
 
+	if id == "0-0" {
+		return protocol.ErrorString("ERR The ID specified in XADD must be greater than 0-0"), nil
+	}
+
 	if len(args) < 3 || len(args)%2 != 0 {
 		return protocol.ErrorString("ERR wrong number of arguments for 'xadd' command"), nil
 	}
