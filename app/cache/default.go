@@ -35,10 +35,18 @@ func LRange(key string, start, end int) []any {
 	return defaultCache.LRange(key, start, end)
 }
 
-func LPush(s string, args []any) int {
-	return defaultCache.LPush(s, args)
+func LPush(key string, args []any) int {
+	return defaultCache.LPush(key, args)
 }
 
-func LLen(s string) int {
-	return defaultCache.LLen(s)
+func LLen(key string) int {
+	return defaultCache.LLen(key)
+}
+
+func RPop(key string) string {
+	return defaultCache.RPop(key)
+}
+
+func LPop(key string) string {
+	return defaultCache.LPop(key)
 }

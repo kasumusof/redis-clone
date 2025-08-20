@@ -1,5 +1,7 @@
 package cache
 
+import "fmt"
+
 var (
 	_ Cache = (*cache)(nil)
 )
@@ -12,6 +14,8 @@ type Cache interface {
 	LPush(key string, data []any) int
 	LRange(key string, start, end int) []any
 	LLen(s string) int
+	RPop(key string) string
+	LPop(key string) string
 }
 type cache struct {
 	data     map[any]any
@@ -26,6 +30,12 @@ func New() Cache {
 
 	go c.runJob()
 	return c
+}
+
+func (c *cache) runJob() {
+	for {
+		select {}
+	}
 }
 
 func (c *cache) Set(key string, value any) {
@@ -95,8 +105,22 @@ func (c *cache) LLen(s string) int {
 	return len(v)
 }
 
-func (c *cache) runJob() {
-	for {
-		select {}
+func (c *cache) RPop(key string) string {
+	v, _ := c.listData[key]
+	if len(v) == 0 {
+		return ""
 	}
+	r := v[len(v)-1]
+	c.listData[key] = v[:len(v)-1]
+	return fmt.Sprintf("%v", r)
+}
+
+func (c *cache) LPop(key string) string {
+	v, _ := c.listData[key]
+	if len(v) == 0 {
+		return ""
+	}
+	r := v[0]
+	c.listData[key] = v[1:]
+	return fmt.Sprintf("%v", r)
 }

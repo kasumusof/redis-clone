@@ -66,3 +66,19 @@ func handleLLen(args []string) (string, error) {
 	r := cache.LLen(args[0])
 	return protocol.Integer(r), nil
 }
+
+func handleRPop(args []string) (string, error) {
+	if len(args) < 1 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'rpop' command"), nil
+	}
+	r := cache.RPop(args[0])
+	return protocol.BulkString(r), nil
+}
+
+func handleLPop(args []string) (string, error) {
+	if len(args) < 1 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'lpop' command"), nil
+	}
+	r := cache.LPop(args[0])
+	return protocol.BulkString(r), nil
+}

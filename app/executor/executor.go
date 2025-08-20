@@ -49,6 +49,10 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleLRange(args)
 	case "llen":
 		return handleLLen(args)
+	case "rpop":
+		return handleRPop(args)
+	case "lpop":
+		return handleLPop(args)
 	default:
 		return errorString, nil
 
