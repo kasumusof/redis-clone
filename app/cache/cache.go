@@ -42,6 +42,7 @@ func New() Cache {
 		listData:           make(map[any][]any),
 		blockedClients:     []chan any{},
 		listDataInsertChan: make(chan struct{}, 3),
+		streamData:         make(map[any][]map[any]any),
 	}
 
 	go c.runJob()
@@ -189,7 +190,10 @@ func (c *cache) Type(key string) string {
 	if !ok {
 		v, ok = c.listData[key]
 		if !ok {
-			return "none"
+			v, ok = c.streamData[key]
+			if !ok {
+				return "none"
+			}
 		}
 	}
 
@@ -206,6 +210,8 @@ func (c *cache) Type(key string) string {
 		return "array"
 	case map[any]any:
 		return "map"
+	case []map[any]any:
+		return "stream"
 	default:
 		return "none"
 	}
