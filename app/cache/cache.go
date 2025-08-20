@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -342,12 +343,18 @@ func (c *cache) XRange(key string, start string, end string) []any {
 }
 
 func validateXRangeFilters(start string, end string) (string, string) {
-	if len(strings.Split(start, "-")) == 1 {
+	if start == "-" {
+		start = "0-1"
+	} else if len(strings.Split(start, "-")) == 1 {
 		start = start + "-0"
 	}
-	if len(strings.Split(end, "-")) == 1 {
+
+	if end == "+" {
+		end = fmt.Sprintf("%d-*", math.MaxInt64)
+	} else if len(strings.Split(end, "-")) == 1 {
 		end = end + "-0"
 	}
+
 	return start, end
 }
 
