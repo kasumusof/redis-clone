@@ -328,12 +328,52 @@ func (c *cache) XRange(key string, start string, end string) []any {
 	if !ok {
 		return nil
 	}
+
+	start, end = validateXRangeFilters(start, end)
+
 	var res []any
 	for _, v := range x {
 		id := strings.Split(v[0].(string), "-")[0]
-		if id >= start && id <= end {
+		if idISGreaterOrEqual(id, start) && idIsLessOrEqual(id, end) {
 			res = append(res, v)
 		}
 	}
 	return res
+}
+
+func validateXRangeFilters(start string, end string) (string, string) {
+	var newStart, newEnd string
+	if len(strings.Split(start, "-")) == 1 {
+		start = start + "-0"
+	}
+	if len(strings.Split(end, "-")) == 1 {
+		end = end + "-0"
+	}
+	return newStart, newEnd
+}
+
+func idISGreaterOrEqual(main string, target string) bool {
+	timeMain, incrMain := strings.Split(main, "-")[0], strings.Split(main, "-")[1]
+	timeTarget, incrTarget := strings.Split(target, "-")[0], strings.Split(target, "-")[1]
+	if timeMain > timeTarget {
+		return true
+	} else if timeMain == timeTarget {
+		incrMain, _ := strconv.Atoi(incrMain)
+		incrTarget, _ := strconv.Atoi(incrTarget)
+		return incrMain >= incrTarget
+	}
+	return false
+}
+
+func idIsLessOrEqual(main string, target string) bool {
+	timeMain, incrMain := strings.Split(main, "-")[0], strings.Split(main, "-")[1]
+	timeTarget, incrTarget := strings.Split(target, "-")[0], strings.Split(target, "-")[1]
+	if timeMain < timeTarget {
+		return true
+	} else if timeMain == timeTarget {
+		incrMain, _ := strconv.Atoi(incrMain)
+		incrTarget, _ := strconv.Atoi(incrTarget)
+		return incrMain <= incrTarget
+	}
+	return false
 }
