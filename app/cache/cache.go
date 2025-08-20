@@ -29,14 +29,6 @@ func (c *cache) RPush(key string, data any) int {
 	v, _ := c.listData[key]
 	c.listData[key] = append(v, data)
 	return len(v) + 1
-	data     map[any]any
-	listData map[any][]any
-}
-
-func (c *cache) RPush(key string, data any) int {
-	v, _ := c.listData[key]
-	c.listData[key] = append(v, data)
-	return len(v) + 1
 }
 
 func (c *cache) Set(key string, value any) {
