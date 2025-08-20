@@ -27,6 +27,6 @@ func Del(key string) any {
 	return defaultCache.Del(key)
 }
 
-func RPush(key string, value any) int {
+func RPush(key string, value []any) int {
 	return defaultCache.RPush(key, value)
 }

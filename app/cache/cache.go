@@ -8,7 +8,7 @@ type Cache interface {
 	Set(key string, value any)
 	Get(key string) (any, bool)
 	Del(key string) any
-	RPush(key string, data any) int
+	RPush(key string, data []any) int
 }
 type cache struct {
 	data     map[any]any
@@ -25,10 +25,10 @@ func New() Cache {
 	return c
 }
 
-func (c *cache) RPush(key string, data any) int {
+func (c *cache) RPush(key string, data []any) int {
 	v, _ := c.listData[key]
-	c.listData[key] = append(v, data)
-	return len(v) + 1
+	c.listData[key] = append(v, data...)
+	return len(v) + len(data)
 }
 
 func (c *cache) Set(key string, value any) {
