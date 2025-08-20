@@ -402,6 +402,7 @@ func idIsGreater(main string, target string) bool {
 
 func (c *cache) XRead(keys []string, targetIDs []string) []any {
 	var gres []any
+	order := map[string]any{}
 
 	var eg errgroup.Group
 	for i, key := range keys {
@@ -417,11 +418,15 @@ func (c *cache) XRead(keys []string, targetIDs []string) []any {
 			}
 
 			res = append([]any{key}, res)
-			gres = append(gres, res)
+			order[key] = res
 			return nil
 		})
 	}
-
 	_ = eg.Wait()
+
+	for _, key := range keys {
+		gres = append(gres, order[key])
+	}
+
 	return gres
 }
