@@ -270,7 +270,7 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	}
 
 	if strings.HasSuffix(id, "*") {
-		id = "0-0"
+		id = "0-1"
 	}
 
 	d := make(map[any]any)
