@@ -15,6 +15,24 @@ type cache struct {
 	listData map[any][]any
 }
 
+func New() Cache {
+	c := &cache{
+		data:     make(map[any]any),
+		listData: make(map[any][]any),
+	}
+
+	go c.runJob()
+	return c
+}
+
+func (c *cache) RPush(key string, data any) int {
+	v, _ := c.listData[key]
+	c.listData[key] = append(v, data)
+	return len(v) + 1
+	data     map[any]any
+	listData map[any][]any
+}
+
 func (c *cache) RPush(key string, data any) int {
 	v, _ := c.listData[key]
 	c.listData[key] = append(v, data)
@@ -34,15 +52,6 @@ func (c *cache) Del(key string) any {
 	old := c.data[key]
 	delete(c.data, key)
 	return old
-}
-
-func New() Cache {
-	c := &cache{
-		data: make(map[any]any),
-	}
-
-	go c.runJob()
-	return c
 }
 
 func (c *cache) runJob() {
