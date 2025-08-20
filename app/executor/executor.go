@@ -1,10 +1,8 @@
 package executor
 
 import (
-	"strconv"
 	"strings"
 
-	"github.com/codecrafters-io/redis-starter-go/app/cache"
 	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
 
