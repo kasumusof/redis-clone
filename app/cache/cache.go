@@ -55,8 +55,9 @@ func (c *cache) LRange(key string, start, end int) []any {
 	if start < 0 {
 		start = 0
 	}
-	if end > len(v) {
-		end = len(v)
+
+	if end >= len(v) {
+		end = len(v) - 1
 	}
 	return v[start:end]
 }
