@@ -413,7 +413,6 @@ func (c *cache) XRead(keys []string, targetIDs []string) []any {
 				id := v[0].(string)
 				if idIsGreater(id, targetID) {
 					res = append(res, v)
-					continue
 				}
 			}
 
