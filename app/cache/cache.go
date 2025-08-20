@@ -262,7 +262,8 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	} else {
 		last := m[len(m)-1]
 		lastID := last[streamIDKey].(string)
-		if !validateXAddID(id, lastID) {
+		_, valid := validateXAddID(id, lastID)
+		if !valid {
 			return lastID, false
 		}
 	}
@@ -279,28 +280,35 @@ func (c *cache) XAdd(key string, id string, elems [][2]any) (string, bool) {
 	return id, true
 }
 
-func validateXAddID(id string, lastElemID string) bool {
+func validateXAddID(id string, lastElemID string) (string, bool) {
 	idSplit := strings.Split(id, "-")
 	if len(idSplit) != 2 {
-		return false
+		return id, false
 	}
 
-	newTime, _ := strconv.Atoi(idSplit[0])
-	newIncr, _ := strconv.Atoi(idSplit[1])
+	newTime, newIncr := idSplit[0], idSplit[1]
 	lastSplit := strings.Split(lastElemID, "-")
 	if len(lastSplit) != 2 {
-		return false
+		return id, false
 	}
 
-	lastTime, _ := strconv.Atoi(lastSplit[0])
-	lastIncr, _ := strconv.Atoi(lastSplit[1])
+	lastTime, lastIncr := lastSplit[0], lastSplit[1]
 
 	switch {
 	case newTime < lastTime:
-		return false
+		return id, false
+	case newIncr == "*":
+		toAdd := "0"
+		if newTime == lastTime {
+			lastIncr, _ := strconv.Atoi(lastIncr)
+			toAdd = strconv.Itoa(lastIncr + 1)
+		}
+
+		id = newTime + "-" + toAdd
+		return id, true
 	case newTime == lastTime && newIncr <= lastIncr:
-		return false
+		return "", false
 	default:
-		return true
+		return id, true
 	}
 }
