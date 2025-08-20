@@ -50,3 +50,7 @@ func RPop(key string, count *int) any {
 func LPop(key string, count *int) any {
 	return defaultCache.LPop(key, count)
 }
+
+func Type(key string) string {
+	return defaultCache.Type(key)
+}

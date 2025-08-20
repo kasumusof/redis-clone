@@ -16,6 +16,7 @@ type Cache interface {
 	LLen(s string) int
 	RPop(key string, count *int) any
 	LPop(key string, count *int) any
+	Type(key string) string
 }
 type cache struct {
 	data     map[any]any
@@ -158,4 +159,31 @@ func (c *cache) LPop(key string, count *int) any {
 
 	c.listData[key] = v[nCount:]
 	return r
+}
+
+func (c *cache) Type(key string) string {
+	v, ok := c.data[key]
+	if !ok {
+		v, ok = c.listData[key]
+		if !ok {
+			return "none"
+		}
+	}
+
+	switch v.(type) {
+	case string:
+		return "string"
+	case int:
+		return "int"
+	case bool:
+		return "bool"
+	case error:
+		return "error"
+	case []any:
+		return "array"
+	case map[any]any:
+		return "map"
+	default:
+		return "none"
+	}
 }

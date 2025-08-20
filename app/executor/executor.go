@@ -53,6 +53,8 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleRPop(args)
 	case "lpop":
 		return handleLPop(args)
+	case "type":
+		return handleType(args)
 	default:
 		return errorString, nil
 
