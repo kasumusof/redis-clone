@@ -9,6 +9,7 @@ type Cache interface {
 	Get(key string) (any, bool)
 	Del(key string) any
 	RPush(key string, data []any) int
+	LPush(key string, data []any) int
 	LRange(key string, start, end int) []any
 }
 type cache struct {
@@ -44,6 +45,12 @@ func (c *cache) Del(key string) any {
 func (c *cache) RPush(key string, data []any) int {
 	v, _ := c.listData[key]
 	c.listData[key] = append(v, data...)
+	return len(v) + len(data)
+}
+
+func (c *cache) LPush(key string, data []any) int {
+	v, _ := c.listData[key]
+	c.listData[key] = append(data, v...)
 	return len(v) + len(data)
 }
 

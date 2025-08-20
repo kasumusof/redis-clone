@@ -34,3 +34,7 @@ func RPush(key string, value []any) int {
 func LRange(key string, start, end int) []any {
 	return defaultCache.LRange(key, start, end)
 }
+
+func LPush(s string, args []any) int {
+	return defaultCache.LPush(s, args)
+}
