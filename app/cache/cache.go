@@ -50,20 +50,31 @@ func (c *cache) RPush(key string, data []any) int {
 func (c *cache) LRange(key string, start, end int) []any {
 	v, _ := c.listData[key]
 
-	for start < 0 {
-		start = len(v) + start
-	}
-	for end < 0 {
-		end = len(v) + end
-	}
+	n := len(v)
 
-	end += 1
-	if len(v) == 0 || start > end {
+	if n == 0 {
 		return []any{}
 	}
 
-	if end > len(v) {
-		end = len(v)
+	// Convert negative indexes
+	if start < 0 {
+		start = n + start
+	}
+	if end < 0 {
+		end = n + end
+	}
+
+	// Clamp to valid bounds
+	if start < 0 {
+		start = 0
+	}
+	if end >= n {
+		end = n - 1
+	}
+
+	// If range is invalid
+	if start > end {
+		return []any{}
 	}
 
 	return v[start:end]
