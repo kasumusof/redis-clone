@@ -48,6 +48,7 @@ func (c *cache) RPush(key string, data []any) int {
 }
 
 func (c *cache) LRange(key string, start, end int) []any {
+	end += 1
 	v, _ := c.listData[key]
 	if len(v) == 0 || start > end {
 		return []any{}
@@ -57,7 +58,7 @@ func (c *cache) LRange(key string, start, end int) []any {
 	}
 
 	if end > len(v) {
-		end = len(v) + 1
+		end = len(v)
 	}
 
 	return v[start:end]

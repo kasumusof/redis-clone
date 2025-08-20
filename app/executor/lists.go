@@ -36,6 +36,6 @@ func handleLRange(args []string) (string, error) {
 		return protocol.ErrorString("ERR invalid end argument for 'lrange' command"), nil
 	}
 
-	r := cache.LRange(args[0], start, end+1)
+	r := cache.LRange(args[0], start, end)
 	return protocol.Array(r), nil
 }
