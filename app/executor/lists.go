@@ -58,3 +58,11 @@ func handleLRange(args []string) (string, error) {
 
 	return protocol.Array(r), nil
 }
+
+func handleLLen(args []string) (string, error) {
+	if len(args) < 1 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'llen' command"), nil
+	}
+	r := cache.LLen(args[0])
+	return protocol.Integer(r), nil
+}

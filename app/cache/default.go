@@ -38,3 +38,7 @@ func LRange(key string, start, end int) []any {
 func LPush(s string, args []any) int {
 	return defaultCache.LPush(s, args)
 }
+
+func LLen(s string) int {
+	return defaultCache.LLen(s)
+}

@@ -47,6 +47,8 @@ func Execute(resp protocol.RESP) (string, error) {
 		return handleLPush(args)
 	case "lrange":
 		return handleLRange(args)
+	case "llen":
+		return handleLLen(args)
 	default:
 		return errorString, nil
 

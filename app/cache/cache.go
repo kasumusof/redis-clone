@@ -11,6 +11,7 @@ type Cache interface {
 	RPush(key string, data []any) int
 	LPush(key string, data []any) int
 	LRange(key string, start, end int) []any
+	LLen(s string) int
 }
 type cache struct {
 	data     map[any]any
@@ -87,6 +88,11 @@ func (c *cache) LRange(key string, start, end int) []any {
 	}
 
 	return v[start:end]
+}
+
+func (c *cache) LLen(s string) int {
+	v, _ := c.listData[s]
+	return len(v)
 }
 
 func (c *cache) runJob() {
