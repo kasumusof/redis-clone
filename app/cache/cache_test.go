@@ -139,3 +139,10 @@ func TestDelMissingKeyReturnsNilNoPanic(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, "val", val)
 }
+
+func TestLRangeNegativeIndex(t *testing.T) {
+	c := New()
+	c.RPush("list", []any{"strawberry", "blueberry", "mango", "apple", "orange", "pineapple", "pear"})
+	got := c.LRange("list", -5, -1)
+	assert.Equal(t, []any{"mango", "apple", "orange", "pineapple", "pear"}, got)
+}
