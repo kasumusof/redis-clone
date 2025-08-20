@@ -11,7 +11,7 @@ func handleGet(args []string) (string, error) {
 	}
 	val, ok := cache.Get(args[0])
 	if !ok {
-		return protocol.Nulls(), nil
+		return protocol.BulkString(""), nil
 	}
 	return protocol.BulkString(val.(string)), nil
 }
