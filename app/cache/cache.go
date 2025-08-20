@@ -217,7 +217,7 @@ func (c *cache) BLPop(key string, timeout float64) chan any {
 
 		ctx := context.Background()
 		if timeout > 0 {
-			ctx, _ = context.WithTimeout(ctx, time.Duration(timeout)*time.Second+2*time.Millisecond)
+			ctx, _ = context.WithTimeout(ctx, time.Duration(timeout*float64(time.Second)))
 		}
 
 		for {
