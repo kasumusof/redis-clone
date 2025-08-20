@@ -120,3 +120,24 @@ func extractPopArgs(args []string) (*int, error) {
 	}
 	return idx, err
 }
+
+func handleBLPop(args []string) (string, error) {
+	if len(args) < 2 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'blpop' command"), nil
+	}
+
+	timeout, err := strconv.Atoi(args[1])
+	if err != nil {
+		return protocol.ErrorString("ERR invalid timeout argument for 'blpop' command"), nil
+	}
+
+	blChan := cache.BLPop(args[0], timeout)
+	r := <-blChan
+	switch r.(type) {
+	case string:
+		return protocol.BulkString(r.(string)), nil
+	default:
+		d, _ := r.([]any)
+		return protocol.Array(d), nil
+	}
+}

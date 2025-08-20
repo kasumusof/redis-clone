@@ -1,6 +1,10 @@
 package cache
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"time"
+)
 
 var (
 	_ Cache = (*cache)(nil)
@@ -17,16 +21,21 @@ type Cache interface {
 	RPop(key string, count *int) any
 	LPop(key string, count *int) any
 	Type(key string) string
+	BLPop(key string, timeout int) chan any
 }
 type cache struct {
-	data     map[any]any
-	listData map[any][]any
+	data               map[any]any
+	listData           map[any][]any
+	blockedClients     []chan any
+	listDataInsertChan chan struct{}
 }
 
 func New() Cache {
 	c := &cache{
-		data:     make(map[any]any),
-		listData: make(map[any][]any),
+		data:               make(map[any]any),
+		listData:           make(map[any][]any),
+		blockedClients:     []chan any{},
+		listDataInsertChan: make(chan struct{}, 3),
 	}
 
 	go c.runJob()
@@ -57,12 +66,20 @@ func (c *cache) Del(key string) any {
 func (c *cache) RPush(key string, data []any) int {
 	v, _ := c.listData[key]
 	c.listData[key] = append(v, data...)
+	if len(c.blockedClients) > 0 { // spread event
+		c.listDataInsertChan <- struct{}{}
+	}
+
 	return len(v) + len(data)
 }
 
 func (c *cache) LPush(key string, data []any) int {
 	v, _ := c.listData[key]
 	c.listData[key] = append(data, v...)
+	if len(c.blockedClients) > 0 { // spread event
+		c.listDataInsertChan <- struct{}{}
+	}
+
 	return len(v) + len(data)
 }
 
@@ -186,4 +203,40 @@ func (c *cache) Type(key string) string {
 	default:
 		return "none"
 	}
+}
+func (c *cache) BLPop(key string, timeout int) chan any {
+	commChan := make(chan any)
+	c.blockedClients = append(c.blockedClients, commChan)
+	go func() {
+		v, ok := c.listData[key]
+		if ok || len(v) > 0 {
+			c.listData[key] = v[1:]
+			commChan <- []any{key, v[0]}
+			return
+		}
+
+		ctx := context.Background()
+		if timeout > 0 {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+			defer cancel()
+		}
+
+		for {
+			select {
+			case <-ctx.Done():
+				commChan <- ""
+				return
+			case <-c.listDataInsertChan:
+				firstChan := c.blockedClients[0]
+				v, ok := c.listData[key]
+				if ok || len(v) > 0 {
+					c.listData[key] = v[1:]
+					firstChan <- []any{key, v[0]}
+					return
+				}
+			}
+		}
+	}()
+	return commChan
 }

@@ -54,3 +54,7 @@ func LPop(key string, count *int) any {
 func Type(key string) string {
 	return defaultCache.Type(key)
 }
+
+func BLPop(s string, timeout int) chan any {
+	return defaultCache.BLPop(s, timeout)
+}
