@@ -45,9 +45,5 @@ func handleXRange(args []string) (string, error) {
 	end := strings.TrimSpace(args[2])
 
 	r := cache.XRange(args[0], start, end)
-	if len(r) == 0 {
-		return protocol.Array([]any{}), nil
-	}
-
 	return protocol.Array(r), nil
 }

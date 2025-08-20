@@ -333,7 +333,7 @@ func (c *cache) XRange(key string, start string, end string) []any {
 
 	var res []any
 	for _, v := range x {
-		id := strings.Split(v[0].(string), "-")[0]
+		id := v[0].(string)
 		if idISGreaterOrEqual(id, start) && idIsLessOrEqual(id, end) {
 			res = append(res, v)
 		}
@@ -342,14 +342,13 @@ func (c *cache) XRange(key string, start string, end string) []any {
 }
 
 func validateXRangeFilters(start string, end string) (string, string) {
-	var newStart, newEnd string
 	if len(strings.Split(start, "-")) == 1 {
 		start = start + "-0"
 	}
 	if len(strings.Split(end, "-")) == 1 {
 		end = end + "-0"
 	}
-	return newStart, newEnd
+	return start, end
 }
 
 func idISGreaterOrEqual(main string, target string) bool {

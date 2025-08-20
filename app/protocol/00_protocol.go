@@ -179,6 +179,13 @@ func Array(a []any) string {
 			resp += Booleans(v.(bool))
 		case error:
 			resp += ErrorString(v.(error).Error())
+		case []any:
+			resp += Array(v.([]any))
+		case [2]any:
+			newArgs := make([]any, 2)
+			newArgs[0] = v.([2]any)[0]
+			newArgs[1] = v.([2]any)[1]
+			resp += Array(newArgs)
 		default:
 			resp += Nulls()
 		}
