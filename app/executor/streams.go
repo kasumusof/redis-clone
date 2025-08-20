@@ -57,6 +57,18 @@ func handleXRead(args []string) (string, error) {
 		return protocol.ErrorString("ERR wrong argument for 'xread' command"), nil
 	}
 
-	r := cache.XRead(args[1], args[2])
+	lenArgs := len(args) - 1
+	if lenArgs%2 != 0 {
+		return protocol.ErrorString("ERR wrong number of arguments for 'xread' command"), nil
+	}
+
+	keys := make([]string, lenArgs/2)
+	ids := make([]string, lenArgs/2)
+	for i := 0; i < lenArgs/2; i++ {
+		keys[i] = args[i+1]
+		ids[i] = args[i+1+lenArgs/2]
+	}
+
+	r := cache.XRead(keys, ids)
 	return protocol.Array(r), nil
 }

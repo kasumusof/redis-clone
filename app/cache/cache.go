@@ -27,7 +27,7 @@ type Cache interface {
 	BLPop(key string, timeout float64) chan any
 	XAdd(key string, id string, elems []any) (string, bool)
 	XRange(key string, start string, end string) []any
-	XRead(key string, id string) []any
+	XRead(keys []string, targetIDs []string) []any
 }
 type cache struct {
 	data               map[any]any
@@ -398,21 +398,24 @@ func idIsGreater(main string, target string) bool {
 	return false
 }
 
-func (c *cache) XRead(key string, idTarget string) []any {
-	var res []any
-	v, ok := c.streamData[key]
-	if !ok {
-		return res
-	}
+func (c *cache) XRead(keys []string, targetIDs []string) []any {
+	var gres []any
 
-	for _, v := range v {
-		id := v[0].(string)
-		if idIsGreater(id, idTarget) {
-			res = append(res, v)
-			continue
+	for i, key := range keys {
+		var res []any
+		targetID := targetIDs[i]
+		v, _ := c.streamData[key]
+		for _, v := range v {
+			id := v[0].(string)
+			if idIsGreater(id, targetID) {
+				res = append(res, v)
+				continue
+			}
 		}
+
+		res = append([]any{key}, res)
+		gres = append(gres, res)
 	}
 
-	res = append([]any{key}, res)
-	return []any{res}
+	return gres
 }
