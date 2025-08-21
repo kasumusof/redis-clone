@@ -67,6 +67,6 @@ func XRange(key, start, end string) []any {
 	return defaultCache.XRange(key, start, end)
 }
 
-func XRead(keys []string, id []string) []any {
-	return defaultCache.XRead(keys, id)
+func XRead(kind string, keys []string, id []string) []any {
+	return defaultCache.XRead(kind, keys, id)
 }

@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/codecrafters-io/redis-starter-go/app/cache"
@@ -53,7 +54,8 @@ func handleXRead(args []string) (string, error) {
 		return protocol.ErrorString("ERR wrong number of arguments for 'xread' command"), nil
 	}
 
-	if strings.ToLower(args[0]) != "streams" {
+	allowedOptions := []string{"streams", "block"}
+	if slices.Contains(allowedOptions, strings.ToLower(args[0])) {
 		return protocol.ErrorString("ERR wrong argument for 'xread' command"), nil
 	}
 
@@ -69,6 +71,6 @@ func handleXRead(args []string) (string, error) {
 		ids[i] = args[i+1+lenArgs/2]
 	}
 
-	r := cache.XRead(keys, ids)
+	r := cache.XRead(args[0], keys, ids)
 	return protocol.Array(r), nil
 }

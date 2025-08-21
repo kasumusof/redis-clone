@@ -29,7 +29,7 @@ type Cache interface {
 	BLPop(key string, timeout float64) chan any
 	XAdd(key string, id string, elems []any) (string, bool)
 	XRange(key string, start string, end string) []any
-	XRead(keys []string, targetIDs []string) []any
+	XRead(kind string, keys []string, targetIDs []string) []any
 }
 type cache struct {
 	data               map[any]any
@@ -400,7 +400,7 @@ func idIsGreater(main string, target string) bool {
 	return false
 }
 
-func (c *cache) XRead(keys []string, targetIDs []string) []any {
+func (c *cache) XRead(kind string, keys []string, targetIDs []string) []any {
 	var gres []any
 	order := map[string]any{}
 
